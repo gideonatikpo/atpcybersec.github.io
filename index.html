@@ -1,220 +1,1566 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATPcyber Sec | Offensive & Defensive Security</title>
-<meta name="description" content="ATPcyber Sec - Professional Penetration Testing for Web, Mobile & Desktop Applications.">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATPcyber Sec | Elite Offensive & Defensive Security</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #00ff41;
+      --green-dim: #00cc33;
+      --green-dark: #003b10;
+      --red: #ff003c;
+      --cyan: #00f5ff;
+      --amber: #ffb300;
+      --bg: #020c05;
+      --bg2: #040f07;
+      --surface: #071a0d;
+      --border: #0f3d1a;
+      --text: #c8f5d0;
+      --text-dim: #4a7a55;
+      --mono: 'Share Tech Mono', monospace;
+      --display: 'Orbitron', sans-serif;
+      --body: 'Rajdhani', sans-serif;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(-45deg, #0f172a, #1e293b, #0b1220, #111827);
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
-    color: #e2e8f0;
-    scroll-behavior: smooth;
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      overflow-x: hidden;
+      cursor: none;
+    }
 
-@keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+    /* ─── CUSTOM CURSOR ─── */
+    #cursor {
+      position: fixed;
+      width: 18px; height: 18px;
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, border-color 0.2s;
+      mix-blend-mode: screen;
+    }
+    #cursor-dot {
+      position: fixed;
+      width: 4px; height: 4px;
+      background: var(--green);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: screen;
+    }
 
-header {
-    text-align: center;
-    padding: 120px 20px;
-}
+    /* ─── MATRIX CANVAS ─── */
+    #matrix-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.12;
+    }
 
-header h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 42px;
-    color: #22c55e;
-}
+    /* ─── SCANLINES ─── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,255,65,0.015) 2px,
+        rgba(0,255,65,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
 
-header p {
-    margin-top: 15px;
-    font-size: 18px;
-    color: #94a3b8;
-}
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4vw;
+      height: 70px;
+      background: linear-gradient(180deg, rgba(2,12,5,0.98) 0%, rgba(2,12,5,0.8) 100%);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: var(--green);
+      text-shadow: 0 0 20px rgba(0,255,65,0.6);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-logo::before {
+      content: '[ATP]';
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s, text-shadow 0.2s;
+      position: relative;
+    }
+    .nav-links a::before { content: '> '; color: var(--green); opacity: 0; transition: opacity 0.2s; }
+    .nav-links a:hover { color: var(--green); text-shadow: 0 0 12px rgba(0,255,65,0.5); }
+    .nav-links a:hover::before { opacity: 1; }
+    .nav-cta {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 8px 20px;
+      border: 1px solid var(--green);
+      color: var(--green);
+      text-decoration: none;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--green);
+      transform: translateX(-100%);
+      transition: transform 0.25s;
+      z-index: -1;
+    }
+    .nav-cta:hover { color: var(--bg); }
+    .nav-cta:hover::before { transform: translateX(0); }
 
-.btn {
-    display: inline-block;
-    margin-top: 30px;
-    padding: 14px 30px;
-    background: #22c55e;
-    color: #000;
-    font-weight: bold;
-    border-radius: 50px;
-    text-decoration: none;
-    transition: 0.3s;
-}
+    /* ─── HERO ─── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0 8vw;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--red);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.3s forwards;
+    }
+    .hero-tag::before { content: '// '; color: var(--text-dim); }
+    .hero-title {
+      font-family: var(--display);
+      font-size: clamp(2.8rem, 7vw, 6.5rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.5s forwards;
+    }
+    .hero-title .atp { color: var(--green); text-shadow: 0 0 40px rgba(0,255,65,0.4); }
+    .hero-title .cyber { color: var(--text); }
+    .hero-title .sec {
+      color: var(--red);
+      text-shadow: 0 0 30px rgba(255,0,60,0.4);
+      display: block;
+      font-size: clamp(1.6rem, 4vw, 3.8rem);
+      letter-spacing: 0.3em;
+      margin-top: 0.2rem;
+    }
+    .hero-subtitle {
+      font-family: var(--mono);
+      font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+      color: var(--text-dim);
+      margin: 2rem 0 3rem;
+      max-width: 600px;
+      line-height: 1.9;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.8s forwards;
+    }
+    .hero-subtitle .hl { color: var(--cyan); }
+    .hero-btns {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.7s 1s forwards;
+    }
+    .btn-primary {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      padding: 14px 36px;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      text-decoration: none;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 700;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      transition: all 0.25s;
+      cursor: none;
+    }
+    .btn-primary:hover {
+      background: #00ff99;
+      box-shadow: 0 0 30px rgba(0,255,65,0.5);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      padding: 14px 36px;
+      border: 1px solid var(--red);
+      color: var(--red);
+      text-decoration: none;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      transition: all 0.25s;
+      cursor: none;
+    }
+    .btn-secondary:hover {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(255,0,60,0.4);
+      transform: translateY(-2px);
+    }
+    .hero-grid-line {
+      position: absolute;
+      right: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 45%;
+      opacity: 0;
+      animation: fadeIn 1.2s 1.2s forwards;
+      pointer-events: none;
+    }
+    .hex-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 2px;
+      opacity: 0.3;
+    }
+    .hex {
+      width: 50px; height: 58px;
+      background: transparent;
+      border: 1px solid var(--border);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      animation: hexPulse var(--d, 4s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    .hex.active {
+      background: rgba(0,255,65,0.08);
+      border-color: var(--green-dim);
+    }
+    @keyframes hexPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; background: rgba(0,255,65,0.12); }
+    }
 
-.btn:hover {
-    transform: scale(1.05);
-}
+    /* ─── TERMINAL BLOCK ─── */
+    .terminal-wrap {
+      position: absolute;
+      right: 6vw;
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(500px, 42vw);
+      opacity: 0;
+      animation: fadeIn 1s 1.4s forwards;
+    }
+    .terminal {
+      background: rgba(4,15,7,0.95);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(0,255,65,0.08), inset 0 0 30px rgba(0,255,65,0.02);
+    }
+    .terminal-header {
+      background: rgba(0,0,0,0.5);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .term-dot.r { background: #ff5f57; }
+    .term-dot.y { background: #ffbd2e; }
+    .term-dot.g { background: #28ca41; }
+    .term-title {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      margin-left: 8px;
+      letter-spacing: 0.1em;
+    }
+    .terminal-body {
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.9;
+      min-height: 320px;
+    }
+    .t-line { display: flex; align-items: flex-start; gap: 8px; }
+    .t-prompt { color: var(--green); flex-shrink: 0; }
+    .t-cmd { color: var(--text); }
+    .t-out { color: var(--text-dim); padding-left: 18px; }
+    .t-out.success { color: var(--green); }
+    .t-out.warn { color: var(--amber); }
+    .t-out.err { color: var(--red); }
+    .t-out.info { color: var(--cyan); }
+    .blink-cursor::after {
+      content: '█';
+      color: var(--green);
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-section {
-    padding: 80px 20px;
-    max-width: 1100px;
-    margin: auto;
-}
+    /* ─── SECTION COMMONS ─── */
+    section { position: relative; z-index: 1; }
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 7rem 4vw;
+    }
+    .section-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--red);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .section-tag::before { content: '// '; }
+    .section-title {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    .section-title .hl { color: var(--green); }
+    .section-line {
+      height: 2px;
+      width: 80px;
+      background: linear-gradient(90deg, var(--green), transparent);
+      margin-bottom: 3rem;
+    }
+    .section-desc {
+      font-size: 1.05rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
 
-h2 {
-    text-align: center;
-    margin-bottom: 50px;
-    font-size: 30px;
-}
+    /* ─── STATS BAR ─── */
+    #stats {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      divide: var(--border);
+    }
+    .stat-item {
+      padding: 2.5rem 2rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .stat-item:hover { background: rgba(0,255,65,0.03); }
+    .stat-item:hover::before { transform: translateX(100%); }
+    .stat-num {
+      font-family: var(--display);
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--green);
+      text-shadow: 0 0 20px rgba(0,255,65,0.4);
+      display: block;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+    }
 
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-}
+    /* ─── SERVICES ─── */
+    #services { background: var(--bg); }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .service-card {
+      background: var(--bg2);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+      cursor: none;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--green);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.35s;
+    }
+    .service-card.red-accent::before { background: var(--red); }
+    .service-card.cyan-accent::before { background: var(--cyan); }
+    .service-card.amber-accent::before { background: var(--amber); }
+    .service-card:hover { background: rgba(0,255,65,0.02); }
+    .service-card:hover::before { transform: scaleY(1); }
+    .service-card.red-accent:hover { background: rgba(255,0,60,0.02); }
+    .service-card.cyan-accent:hover { background: rgba(0,245,255,0.02); }
+    .service-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      filter: drop-shadow(0 0 8px rgba(0,255,65,0.5));
+    }
+    .service-card.red-accent .service-icon { filter: drop-shadow(0 0 8px rgba(255,0,60,0.5)); }
+    .service-card.cyan-accent .service-icon { filter: drop-shadow(0 0 8px rgba(0,245,255,0.5)); }
+    .service-num {
+      position: absolute;
+      top: 2.5rem; right: 2rem;
+      font-family: var(--display);
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: rgba(0,255,65,0.04);
+      line-height: 1;
+    }
+    .service-card.red-accent .service-num { color: rgba(255,0,60,0.04); }
+    .service-card.cyan-accent .service-num { color: rgba(0,245,255,0.04); }
+    .service-title {
+      font-family: var(--display);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+    .service-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+    .service-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 3px 10px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .service-card:hover .tag { border-color: rgba(0,255,65,0.3); color: var(--green); }
+    .service-card.red-accent:hover .tag { border-color: rgba(255,0,60,0.3); color: var(--red); }
+    .service-card.cyan-accent:hover .tag { border-color: rgba(0,245,255,0.3); color: var(--cyan); }
 
-.card {
-    background: rgba(30, 41, 59, 0.6);
-    backdrop-filter: blur(10px);
-    padding: 30px;
-    border-radius: 15px;
-    transition: 0.4s;
-    opacity: 0;
-    transform: translateY(30px);
-}
+    /* ─── OFFENSIVE / DEFENSIVE DUAL ─── */
+    #dual {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+    .dual-panel {
+      padding: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .dual-panel.off {
+      border-right: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(255,0,60,0.03) 0%, transparent 60%);
+    }
+    .dual-panel.def {
+      background: linear-gradient(135deg, rgba(0,255,65,0.03) 0%, transparent 60%);
+    }
+    .dual-badge {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border: 1px solid;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+    .dual-panel.off .dual-badge { color: var(--red); border-color: var(--red); }
+    .dual-panel.def .dual-badge { color: var(--green); border-color: var(--green); }
+    .dual-title {
+      font-family: var(--display);
+      font-size: 1.6rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.5rem;
+    }
+    .dual-panel.off .dual-title { color: var(--red); text-shadow: 0 0 20px rgba(255,0,60,0.3); }
+    .dual-panel.def .dual-title { color: var(--green); text-shadow: 0 0 20px rgba(0,255,65,0.3); }
+    .dual-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .dual-list li {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.6;
+    }
+    .dual-list li::before { content: '▸'; flex-shrink: 0; }
+    .dual-panel.off .dual-list li::before { color: var(--red); }
+    .dual-panel.def .dual-list li::before { color: var(--green); }
+    .dual-bg-text {
+      position: absolute;
+      bottom: -1rem; right: 1rem;
+      font-family: var(--display);
+      font-size: 6rem;
+      font-weight: 900;
+      opacity: 0.03;
+      letter-spacing: 0.05em;
+      user-select: none;
+    }
+    .dual-panel.off .dual-bg-text { color: var(--red); }
+    .dual-panel.def .dual-bg-text { color: var(--green); }
 
-.card:hover {
-    transform: translateY(-10px);
-}
+    /* ─── PROCESS ─── */
+    #process { background: var(--bg); }
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      position: relative;
+    }
+    .process-steps::before {
+      content: '';
+      position: absolute;
+      top: 40px; left: 10%;
+      width: 80%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), var(--green-dim), var(--border), transparent);
+    }
+    .process-step {
+      text-align: center;
+      padding: 2rem 1rem;
+      position: relative;
+    }
+    .step-num {
+      width: 80px; height: 80px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--display);
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--green);
+      margin: 0 auto 1.5rem;
+      background: var(--bg2);
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s;
+    }
+    .process-step:hover .step-num {
+      border-color: var(--green);
+      box-shadow: 0 0 25px rgba(0,255,65,0.3);
+      background: rgba(0,255,65,0.05);
+    }
+    .step-title {
+      font-family: var(--display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      margin-bottom: 0.7rem;
+    }
+    .step-desc {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
 
-.process li {
-    margin-bottom: 15px;
-}
+    /* ─── LIVE THREAT TICKER ─── */
+    #threat-ticker {
+      background: rgba(255,0,60,0.04);
+      border-top: 1px solid rgba(255,0,60,0.2);
+      border-bottom: 1px solid rgba(255,0,60,0.2);
+      overflow: hidden;
+      padding: 12px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .ticker-inner {
+      display: flex;
+      gap: 5rem;
+      animation: tickerMove 30s linear infinite;
+      white-space: nowrap;
+      width: max-content;
+    }
+    .ticker-item {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--red);
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .ticker-item::before { content: '⚠'; font-size: 0.65rem; }
+    .ticker-sep { color: rgba(255,0,60,0.3); }
+    @keyframes tickerMove { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
-.contact-box {
-    text-align: center;
-    background: rgba(30, 41, 59, 0.6);
-    backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: 15px;
-}
+    /* ─── WHY US ─── */
+    #why { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .why-card {
+      padding: 2.5rem 2rem;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .why-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      transform: scaleX(0);
+      transition: transform 0.4s;
+    }
+    .why-card:hover { border-color: rgba(0,255,65,0.2); background: rgba(0,255,65,0.02); }
+    .why-card:hover::after { transform: scaleX(1); }
+    .why-icon { font-size: 2rem; margin-bottom: 1.2rem; display: block; }
+    .why-title {
+      font-family: var(--display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--green);
+      margin-bottom: 0.8rem;
+    }
+    .why-desc { font-size: 0.88rem; color: var(--text-dim); line-height: 1.8; }
 
-.contact-box a {
-    color: #22c55e;
-    font-weight: bold;
-    text-decoration: none;
-}
+    /* ─── CONTACT ─── */
+    #contact { background: var(--bg); }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .contact-info-title {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: border-color 0.3s;
+    }
+    .contact-item:hover { border-color: rgba(0,255,65,0.3); }
+    .contact-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .contact-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .contact-val {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      color: var(--green);
+    }
+    .contact-terminal {
+      background: rgba(4,15,7,0.9);
+      border: 1px solid var(--border);
+    }
+    .contact-terminal .terminal-body { min-height: 380px; }
+    .contact-form-group {
+      margin-bottom: 1.2rem;
+    }
+    .contact-form-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .contact-form-label::before { content: '> '; color: var(--green); }
+    .contact-form-input,
+    .contact-form-textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 8px 4px;
+      outline: none;
+      transition: border-color 0.3s;
+      caret-color: var(--green);
+    }
+    .contact-form-input:focus,
+    .contact-form-textarea:focus { border-color: var(--green); }
+    .contact-form-textarea { resize: vertical; min-height: 80px; }
+    .contact-form-btn {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      padding: 12px 30px;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: none;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      transition: all 0.25s;
+      margin-top: 1rem;
+    }
+    .contact-form-btn:hover { background: #00ff99; box-shadow: 0 0 25px rgba(0,255,65,0.4); }
 
-footer {
-    text-align: center;
-    padding: 30px;
-    font-size: 14px;
-    color: #64748b;
-}
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 3rem 8vw;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .footer-logo {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 15px rgba(0,255,65,0.4);
+    }
+    .footer-logo span { color: var(--red); }
+    .footer-copy {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--green); }
+    .footer-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+    @keyframes statusPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
-/* Floating WhatsApp Button */
-.whatsapp-float {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #25D366;
-    color: white;
-    padding: 15px 18px;
-    border-radius: 50%;
-    font-size: 20px;
-    text-decoration: none;
-    box-shadow: 0 0 15px rgba(0,0,0,0.4);
-    transition: 0.3s;
-}
+    /* ─── GLITCH EFFECT ─── */
+    .glitch {
+      position: relative;
+    }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+    .glitch::before {
+      color: var(--red);
+      animation: glitchTop 3.5s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+    .glitch::after {
+      color: var(--cyan);
+      animation: glitchBot 3.5s infinite;
+      clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    }
+    @keyframes glitchTop {
+      0%,90%,100%{transform:translateX(0)} 92%{transform:translateX(-3px)} 94%{transform:translateX(3px)} 96%{transform:translateX(-2px)} 98%{transform:translateX(2px)}
+    }
+    @keyframes glitchBot {
+      0%,88%,100%{transform:translateX(0)} 90%{transform:translateX(3px)} 92%{transform:translateX(-3px)} 94%{transform:translateX(2px)} 96%{transform:translateX(-2px)}
+    }
 
-.whatsapp-float:hover {
-    transform: scale(1.1);
-}
-</style>
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s, transform 0.7s;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .terminal-wrap { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-item { border-bottom: 1px solid var(--border); }
+      .dual-grid { grid-template-columns: 1fr; }
+      .dual-panel.off { border-right: none; border-bottom: 1px solid var(--border); }
+      .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .process-steps { grid-template-columns: repeat(2, 1fr); }
+      .process-steps::before { display: none; }
+      .why-grid { grid-template-columns: 1fr; }
+      .services-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ─── SCROLL INDICATOR ─── */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeIn 1s 2s forwards;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(180deg, var(--green), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    .scroll-text {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      writing-mode: vertical-lr;
+    }
+    @keyframes scrollPulse {
+      0%,100%{opacity:0.4} 50%{opacity:1}
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    .noise {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* corner decorations */
+    .corner-tl, .corner-br {
+      position: absolute;
+      width: 30px; height: 30px;
+      pointer-events: none;
+    }
+    .corner-tl { top: 0; left: 0; border-top: 2px solid var(--green); border-left: 2px solid var(--green); }
+    .corner-br { bottom: 0; right: 0; border-bottom: 2px solid var(--green); border-right: 2px solid var(--green); }
+  </style>
 </head>
-
 <body>
 
-<header>
-    <h1>ATPcyber Sec</h1>
-    <p>Offensive & Defensive Security Testing</p>
-    <p>Web • Mobile • Desktop • Network</p>
-    <a href="https://wa.me/233509623336" class="btn">Start Secure Conversation</a>
-</header>
+<div class="noise"></div>
+<canvas id="matrix-bg"></canvas>
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
 
-<section>
-    <h2>Services</h2>
-    <div class="cards">
-        <div class="card">
-            <h3>Web Application Testing</h3>
-            <p>OWASP Top 10, authentication flaws, business logic vulnerabilities.</p>
-        </div>
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">ATP<span>cyber</span>&nbsp;Sec</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#dual">Methodology</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Engage Now</a>
+</nav>
 
-        <div class="card">
-            <h3>Mobile & Desktop Security</h3>
-            <p>Android, iOS and Windows application penetration testing.</p>
-        </div>
+<!-- HERO -->
+<section id="hero">
+  <p class="hero-tag">Advanced Threat Protection</p>
+  <h1 class="hero-title">
+    <span class="atp glitch" data-text="ATP">ATP</span><span class="cyber">cyber</span>
+    <span class="sec">Security</span>
+  </h1>
+  <p class="hero-subtitle">
+    Full-spectrum cyber operations. We <span class="hl">break systems</span> before adversaries do,<br>
+    and <span class="hl">harden defenses</span> that actually hold. No theory — pure field craft.
+  </p>
+  <div class="hero-btns">
+    <a href="#contact" class="btn-primary">Launch Engagement</a>
+    <a href="#services" class="btn-secondary">View Services</a>
+  </div>
+  <div class="scroll-indicator">
+    <span class="scroll-text">scroll</span>
+    <div class="scroll-line"></div>
+  </div>
 
-        <div class="card">
-            <h3>Network & Red Team</h3>
-            <p>Infrastructure testing, privilege escalation & lateral movement simulation.</p>
-        </div>
-
-        <div class="card">
-            <h3>Defensive Security</h3>
-            <p>Vulnerability assessments and secure code review.</p>
-        </div>
+  <!-- TERMINAL -->
+  <div class="terminal-wrap">
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="term-dot r"></div>
+        <div class="term-dot y"></div>
+        <div class="term-dot g"></div>
+        <span class="term-title">atpcyber@ops ~ $ recon --target [redacted]</span>
+      </div>
+      <div class="terminal-body" id="hero-terminal"></div>
     </div>
+  </div>
 </section>
 
-<section>
-    <h2>Engagement Process</h2>
-    <ul class="process">
-        <li>1. Consultation</li>
-        <li>2. Scope & Authorization</li>
-        <li>3. Security Testing</li>
-        <li>4. Detailed Technical Report</li>
-        <li>5. Retesting & Validation</li>
-    </ul>
-</section>
+<!-- THREAT TICKER -->
+<div id="threat-ticker">
+  <div class="ticker-inner" id="ticker-inner"></div>
+</div>
 
-<section>
-    <h2>Contact</h2>
-    <div class="contact-box">
-        <p><strong>Phone:</strong> <a href="tel:+233509623336">0509623336</a></p>
-        <p><strong>WhatsApp:</strong> 
-            <a href="https://wa.me/233509623336">Chat Directly</a>
-        </p>
-        <p>Remote Engagement – Worldwide</p>
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <span class="stat-num" data-count="300">0</span>
+      <span class="stat-label">Engagements Completed</span>
     </div>
+    <div class="stat-item reveal">
+      <span class="stat-num" data-count="98">0</span>
+      <span class="stat-label">% Client Retention</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num" data-count="1200">0</span>
+      <span class="stat-label">Vulnerabilities Found</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num" data-count="24">0</span>
+      <span class="stat-label">Hour Incident Response</span>
+    </div>
+  </div>
 </section>
 
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-inner">
+    <p class="section-tag reveal">What We Do</p>
+    <h2 class="section-title reveal"><span class="hl">Full-Spectrum</span> Security Services</h2>
+    <div class="section-line reveal"></div>
+
+    <div class="services-grid">
+      <!-- OFFENSIVE -->
+      <div class="service-card red-accent reveal">
+        <span class="service-icon">🎯</span>
+        <span class="service-num">01</span>
+        <h3 class="service-title">Penetration Testing</h3>
+        <p class="service-desc">Controlled adversarial attacks against your systems — web apps, APIs, networks, cloud. We find the holes before threat actors do.</p>
+        <div class="service-tags">
+          <span class="tag">Web App</span><span class="tag">API</span><span class="tag">Network</span><span class="tag">Cloud</span>
+        </div>
+      </div>
+      <div class="service-card red-accent reveal">
+        <span class="service-icon">🦠</span>
+        <span class="service-num">02</span>
+        <h3 class="service-title">Red Team Operations</h3>
+        <p class="service-desc">Full-scenario adversary simulation. We emulate real APT groups — phishing, lateral movement, persistence, data exfil — end-to-end.</p>
+        <div class="service-tags">
+          <span class="tag">APT Emulation</span><span class="tag">Social Eng.</span><span class="tag">Persistence</span>
+        </div>
+      </div>
+      <div class="service-card red-accent reveal">
+        <span class="service-icon">🔑</span>
+        <span class="service-num">03</span>
+        <h3 class="service-title">Exploit Development</h3>
+        <p class="service-desc">Custom exploit writing, zero-day research, CVE analysis. We develop proof-of-concept payloads to demonstrate true business risk.</p>
+        <div class="service-tags">
+          <span class="tag">0-Day Research</span><span class="tag">CVE</span><span class="tag">PoC Dev</span>
+        </div>
+      </div>
+
+      <!-- DEFENSIVE -->
+      <div class="service-card reveal">
+        <span class="service-icon">🛡️</span>
+        <span class="service-num">04</span>
+        <h3 class="service-title">Blue Team & SOC</h3>
+        <p class="service-desc">Building and hardening your defensive posture. SIEM tuning, alert triage, detection rules, and 24/7 monitoring capability uplift.</p>
+        <div class="service-tags">
+          <span class="tag">SIEM</span><span class="tag">Detection Eng.</span><span class="tag">Threat Hunt</span>
+        </div>
+      </div>
+      <div class="service-card cyan-accent reveal">
+        <span class="service-icon">🔍</span>
+        <span class="service-num">05</span>
+        <h3 class="service-title">Digital Forensics & IR</h3>
+        <p class="service-desc">Breach response, malware analysis, memory forensics, timeline reconstruction. We contain damage and uncover root cause fast.</p>
+        <div class="service-tags">
+          <span class="tag">DFIR</span><span class="tag">Malware Analysis</span><span class="tag">Containment</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-icon">📋</span>
+        <span class="service-num">06</span>
+        <h3 class="service-title">Security Assessments</h3>
+        <p class="service-desc">Architecture reviews, threat modelling, compliance gap analysis (ISO 27001, PCI-DSS, GDPR, HIPAA). Risk-ranked, actionable reports.</p>
+        <div class="service-tags">
+          <span class="tag">ISO 27001</span><span class="tag">GDPR</span><span class="tag">PCI-DSS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OFFENSIVE vs DEFENSIVE DUAL -->
+<section id="dual">
+  <div class="section-inner">
+    <p class="section-tag reveal">Our Methodology</p>
+    <h2 class="section-title reveal">Attack. <span class="hl">Defend.</span> Dominate.</h2>
+    <div class="section-line reveal"></div>
+    <div class="dual-grid reveal">
+      <div class="dual-panel off">
+        <div class="corner-tl"></div>
+        <span class="dual-badge">Offensive Ops</span>
+        <h3 class="dual-title">Red Team</h3>
+        <ul class="dual-list">
+          <li>OSINT & Passive Reconnaissance</li>
+          <li>Phishing & Social Engineering Campaigns</li>
+          <li>Vulnerability Exploitation & Chaining</li>
+          <li>Privilege Escalation & Lateral Movement</li>
+          <li>Data Exfiltration Simulation</li>
+          <li>C2 Infrastructure Deployment</li>
+          <li>Physical Security Testing</li>
+          <li>Wireless & IoT Attack Vectors</li>
+        </ul>
+        <div class="dual-bg-text">RED</div>
+      </div>
+      <div class="dual-panel def">
+        <div class="corner-br"></div>
+        <span class="dual-badge">Defensive Ops</span>
+        <h3 class="dual-title">Blue Team</h3>
+        <ul class="dual-list">
+          <li>Security Architecture Review & Design</li>
+          <li>SIEM / EDR Deployment & Tuning</li>
+          <li>Threat Intelligence Integration</li>
+          <li>Incident Response Planning & Execution</li>
+          <li>Log Correlation & Anomaly Detection</li>
+          <li>Security Awareness Training</li>
+          <li>Hardening & Baseline Configuration</li>
+          <li>Continuous Vulnerability Management</li>
+        </ul>
+        <div class="dual-bg-text">BLUE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="section-inner">
+    <p class="section-tag reveal">Engagement Flow</p>
+    <h2 class="section-title reveal">How We <span class="hl">Operate</span></h2>
+    <div class="section-line reveal"></div>
+    <div class="process-steps">
+      <div class="process-step reveal">
+        <div class="step-num">01</div>
+        <h4 class="step-title">Scoping</h4>
+        <p class="step-desc">Define objectives, rules of engagement, legal boundaries and threat model.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="step-num">02</div>
+        <h4 class="step-title">Recon</h4>
+        <p class="step-desc">OSINT, passive fingerprinting, attack surface mapping and intel gathering.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="step-num">03</div>
+        <h4 class="step-title">Exploitation</h4>
+        <p class="step-desc">Active testing, chained exploit sequences and adversary simulation.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="step-num">04</div>
+        <h4 class="step-title">Analysis</h4>
+        <p class="step-desc">Risk rating, impact mapping and root cause identification across findings.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="step-num">05</div>
+        <h4 class="step-title">Report</h4>
+        <p class="step-desc">Executive summary + technical deep-dive with remediation roadmap.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section id="why">
+  <div class="section-inner">
+    <p class="section-tag reveal">Why ATPcyber Sec</p>
+    <h2 class="section-title reveal">Built for the <span class="hl">Real World</span></h2>
+    <div class="section-line reveal"></div>
+    <div class="why-grid">
+      <div class="why-card reveal">
+        <span class="why-icon">⚔️</span>
+        <h4 class="why-title">Both Sides of the Game</h4>
+        <p class="why-desc">We run offense and defense simultaneously. We know how attackers think because we are attackers — and that makes our defense unmatched.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">🧠</span>
+        <h4 class="why-title">Field-Proven Operators</h4>
+        <p class="why-desc">No juniors left unsupervised. Every engagement is handled by experienced operators who have lived in real threat environments.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">📄</span>
+        <h4 class="why-title">Reports That Mean Something</h4>
+        <p class="why-desc">No fluff. Our deliverables are risk-ranked, technically precise and include reproduction steps — not just a CVSS score list.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">🔒</span>
+        <h4 class="why-title">Confidential by Default</h4>
+        <p class="why-desc">NDAs, encrypted channels, air-gapped reporting. Your engagement data never leaves our secure workflow.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">⚡</span>
+        <h4 class="why-title">Fast Turnaround</h4>
+        <p class="why-desc">From kickoff to final report — we move fast. Emergency incident response available within hours, not days.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">🌍</span>
+        <h4 class="why-title">Any Environment</h4>
+        <p class="why-desc">Cloud, on-prem, hybrid, OT/ICS, mobile, embedded — if it runs code, we can test it. No scope is out of reach.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <p class="section-tag reveal">Get In Touch</p>
+    <h2 class="section-title reveal"><span class="hl">Initiate</span> An Engagement</h2>
+    <div class="section-line reveal"></div>
+    <div class="contact-grid">
+      <div class="reveal">
+        <p class="contact-info-title">Direct Comms</p>
+        <div class="contact-item">
+          <span class="contact-icon">📲</span>
+          <div>
+            <p class="contact-label">WhatsApp / Call</p>
+            <p class="contact-val">0509623336</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">💬</span>
+          <div>
+            <p class="contact-label">Handle</p>
+            <p class="contact-val">whatdapt</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">🕐</span>
+          <div>
+            <p class="contact-label">Availability</p>
+            <p class="contact-val">24 / 7 — Always On</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">🌐</span>
+          <div>
+            <p class="contact-label">Operations</p>
+            <p class="contact-val">Remote & On-Site Available</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="terminal contact-terminal">
+          <div class="terminal-header">
+            <div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div>
+            <span class="term-title">atpcyber@ops ~ $ send --message</span>
+          </div>
+          <div class="terminal-body" style="padding:1.5rem;">
+            <div class="t-out" style="margin-bottom:1.2rem;">// Fill the form below. We respond fast.</div>
+            <div class="contact-form-group">
+              <label class="contact-form-label">Name</label>
+              <input class="contact-form-input" type="text" placeholder="your_name" id="cf-name" />
+            </div>
+            <div class="contact-form-group">
+              <label class="contact-form-label">Contact</label>
+              <input class="contact-form-input" type="text" placeholder="email_or_phone" id="cf-contact" />
+            </div>
+            <div class="contact-form-group">
+              <label class="contact-form-label">Engagement Type</label>
+              <input class="contact-form-input" type="text" placeholder="pentest / red team / dfir / consult" id="cf-type" />
+            </div>
+            <div class="contact-form-group">
+              <label class="contact-form-label">Message</label>
+              <textarea class="contact-form-textarea" placeholder="describe your objective..." id="cf-msg"></textarea>
+            </div>
+            <button class="contact-form-btn" onclick="handleFormSubmit()">./send_message.sh</button>
+            <div id="form-response" style="font-family:var(--mono);font-size:0.75rem;margin-top:1rem;color:var(--green);display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-    <p>All security testing is conducted strictly under written authorization.</p>
-    <p>© 2026 ATPcyber Sec</p>
+  <div class="footer-inner">
+    <div class="footer-logo">ATP<span>cyber</span> Sec</div>
+    <ul class="footer-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#dual">Methodology</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="footer-status">
+      <div class="status-dot"></div>
+      Systems Operational
+    </div>
+    <p class="footer-copy">© 2025 ATPcyber Sec. All rights reserved. | Handle: whatdapt | 0509623336</p>
+  </div>
 </footer>
 
-<a href="https://wa.me/233509623336" class="whatsapp-float">💬</a>
-
 <script>
-const cards = document.querySelectorAll('.card');
+/* ─── MATRIX RAIN ─── */
+(function(){
+  const canvas = document.getElementById('matrix-bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, cols, drops;
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ01アBCDEF0109ABCDEF01ABCDEF'.split('');
 
-window.addEventListener('scroll', () => {
-    cards.forEach(card => {
-        const top = card.getBoundingClientRect().top;
-        const height = window.innerHeight;
+  function init(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    cols = Math.floor(W / 18);
+    drops = Array.from({length: cols}, () => Math.random() * -H/14);
+  }
 
-        if (top < height - 100) {
-            card.style.opacity = 1;
-            card.style.transform = "translateY(0)";
-        }
+  function draw(){
+    ctx.fillStyle = 'rgba(2,12,5,0.05)';
+    ctx.fillRect(0,0,W,H);
+    ctx.font = '13px Share Tech Mono, monospace';
+    drops.forEach((y, i) => {
+      const ch = chars[Math.floor(Math.random() * chars.length)];
+      const bright = y > 0 && drops[i] < 2;
+      ctx.fillStyle = bright ? '#ffffff' : '#00ff41';
+      ctx.globalAlpha = bright ? 0.9 : 0.5;
+      ctx.fillText(ch, i * 18, y * 14);
+      ctx.globalAlpha = 1;
+      if(y * 14 > H && Math.random() > 0.975) drops[i] = 0;
+      else drops[i] += 0.5;
     });
-});
-</script>
+  }
 
+  init();
+  window.addEventListener('resize', init);
+  setInterval(draw, 45);
+})();
+
+/* ─── CURSOR ─── */
+(function(){
+  const cur = document.getElementById('cursor');
+  const dot = document.getElementById('cursor-dot');
+  let mx=0, my=0, cx=0, cy=0;
+
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx+'px'; dot.style.top = my+'px'; });
+
+  function animate(){
+    cx += (mx - cx) * 0.12;
+    cy += (my - cy) * 0.12;
+    cur.style.left = cx+'px'; cur.style.top = cy+'px';
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  document.querySelectorAll('a,button,.service-card,.why-card,.stat-item,.contact-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { cur.style.transform = 'translate(-50%,-50%) scale(1.7)'; cur.style.borderColor = 'var(--red)'; });
+    el.addEventListener('mouseleave', () => { cur.style.transform = 'translate(-50%,-50%) scale(1)'; cur.style.borderColor = 'var(--green)'; });
+  });
+})();
+
+/* ─── HERO TERMINAL ANIMATION ─── */
+(function(){
+  const el = document.getElementById('hero-terminal');
+  const lines = [
+    { type:'cmd', text:'nmap -sV -O --script vuln 10.0.0.1/24' },
+    { type:'out', cls:'info', text:'Starting Nmap 7.94 — Advanced port scan' },
+    { type:'out', cls:'', text:'Discovered open port 22/tcp on 10.0.0.14' },
+    { type:'out', cls:'', text:'Discovered open port 443/tcp on 10.0.0.22' },
+    { type:'out', cls:'warn', text:'[!] CVE-2023-44487 detected — HTTP/2 RapidReset' },
+    { type:'out', cls:'err', text:'[CRITICAL] Unpatched OpenSSH 8.2 — RCE vector' },
+    { type:'cmd', text:'gobuster dir -u https://target.com -w /wordlists/big.txt' },
+    { type:'out', cls:'success', text:'/admin         [Status: 200] [Size: 4823]' },
+    { type:'out', cls:'success', text:'/api/v1        [Status: 200] [Size: 1240]' },
+    { type:'out', cls:'warn', text:'/backup.zip    [Status: 200] [Size: 28.4MB]' },
+    { type:'cmd', text:'python3 exploit.py --target 10.0.0.22 --payload rev_shell' },
+    { type:'out', cls:'err', text:'[*] Sending payload to vulnerable endpoint...' },
+    { type:'out', cls:'success', text:'[+] Shell obtained: root@victim:~# ' },
+    { type:'out', cls:'info', text:'[ATP] Reporting. Initiating remediation brief.' },
+  ];
+
+  let i = 0, j = 0, currentDiv = null;
+
+  function addLine(line, cb){
+    const div = document.createElement('div');
+    div.className = `t-line`;
+    if(line.type === 'cmd'){
+      div.innerHTML = `<span class="t-prompt">atpcyber@ops:~$</span><span class="t-cmd"></span>`;
+      el.appendChild(div);
+      currentDiv = div.querySelector('.t-cmd');
+      typeText(currentDiv, line.text, cb);
+    } else {
+      div.innerHTML = `<span class="t-out ${line.cls||''}">${line.text}</span>`;
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+      setTimeout(cb, 120);
+    }
+  }
+
+  function typeText(target, text, cb){
+    let k = 0;
+    const iv = setInterval(() => {
+      target.textContent += text[k++];
+      el.scrollTop = el.scrollHeight;
+      if(k >= text.length){ clearInterval(iv); setTimeout(cb, 300); }
+    }, 28);
+  }
+
+  function runTerminal(){
+    if(i >= lines.length){ i = 0; el.innerHTML = ''; setTimeout(runTerminal, 2000); return; }
+    addLine(lines[i++], runTerminal);
+  }
+
+  setTimeout(runTerminal, 1800);
+})();
+
+/* ─── THREAT TICKER ─── */
+(function(){
+  const threats = [
+    'ACTIVE THREAT: Ransomware campaign targeting SMEs via exposed RDP',
+    'ADVISORY: Critical Ivanti CVSS 10.0 — patch immediately',
+    'ALERT: Phishing surge — executive impersonation up 340%',
+    'ADVISORY: Log4Shell exploitation still active in unpatched systems',
+    'ALERT: Supply chain attack vector via npm packages detected',
+    'ACTIVE THREAT: Zero-day in popular VPN clients being weaponised',
+    'ADVISORY: BEC attacks targeting finance departments — verify wire requests',
+  ];
+  const ticker = document.getElementById('ticker-inner');
+  const doubled = [...threats, ...threats];
+  ticker.innerHTML = doubled.map(t =>
+    `<span class="ticker-item">${t}</span><span class="ticker-sep"> ‖ </span>`
+  ).join('');
+})();
+
+/* ─── COUNTER ANIMATION ─── */
+function animateCount(el, target){
+  let current = 0;
+  const step = Math.ceil(target / 60);
+  const iv = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = current + (el.dataset.suffix || '');
+    if(current >= target) clearInterval(iv);
+  }, 25);
+}
+
+/* ─── SCROLL REVEAL ─── */
+(function(){
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        const counter = entry.target.querySelector('[data-count]');
+        if(counter) animateCount(counter, parseInt(counter.dataset.count));
+        if(entry.target.querySelector) {
+          entry.target.querySelectorAll('[data-count]').forEach(c => animateCount(c, parseInt(c.dataset.count)));
+        }
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const parent = el.closest('.reveal') || el;
+    if(!parent.classList.contains('reveal')){
+      new IntersectionObserver(entries => {
+        if(entries[0].isIntersecting) animateCount(el, parseInt(el.dataset.count));
+      }, {threshold:0.5}).observe(el);
+    }
+  });
+})();
+
+/* ─── FORM ─── */
+function handleFormSubmit(){
+  const name = document.getElementById('cf-name').value.trim();
+  const contact = document.getElementById('cf-contact').value.trim();
+  const type = document.getElementById('cf-type').value.trim();
+  const msg = document.getElementById('cf-msg').value.trim();
+  const resp = document.getElementById('form-response');
+  if(!name || !contact){
+    resp.style.color = 'var(--red)';
+    resp.textContent = '[ERROR] Name and contact are required.';
+    resp.style.display = 'block';
+    return;
+  }
+  resp.style.color = 'var(--green)';
+  resp.style.display = 'block';
+  const lines = [
+    '[*] Encrypting message...',
+    '[*] Establishing secure channel...',
+    `[+] Message queued for: whatdapt | 0509623336`,
+    `[+] We will contact you shortly at: ${contact}`,
+    '[✓] Transmission complete. Stand by.',
+  ];
+  let i = 0;
+  resp.textContent = '';
+  const iv = setInterval(() => {
+    resp.textContent += (i > 0 ? '\n' : '') + lines[i++];
+    if(i >= lines.length) clearInterval(iv);
+  }, 600);
+}
+
+/* ─── MOBILE NAV BURGER (simple toggle for small screens) ─── */
+/* Nav already simplified for mobile, no burger needed at this stage */
+</script>
 </body>
 </html>
